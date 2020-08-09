@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 import TransactionsRepository from '../repositories/Transactions.repositories';
 import CreateTransactionService from '../services/CreateTransactionService';
@@ -8,24 +8,35 @@ const transactionsRepository = new TransactionsRepository();
 const createTransactionService = new CreateTransactionService(transactionsRepository);
 
 interface TransactionControllerDTO {
-  list(_request: Request, response: Response): Response;
-  create(request: Request, response: Response): Response;
+  list(_request: Request, response: Response, next: NextFunction): Response | void;
+  create(request: Request, response: Response, next: NextFunction): Response | void;
 }
 
 const TransactionController: TransactionControllerDTO = {
-  list: (_request: Request, response: Response): Response => {
+  list: (_request: Request, response: Response, next: NextFunction): Response | void => {
     try {
       const transactions = transactionsRepository.all();
 
       const balance = transactionsRepository.getBalance();
 
-      return response.status(200).json({ balance, transactions });
-    } catch (err) {
-      return response.status(err.status || 400).json({ error: err.message });
+      const responseBody = { balance, transactions };
+      const httpStatusCodeOk = 200;
+
+      response.locals.responseBody = responseBody;
+      response.locals.httpStatusCode = httpStatusCodeOk;
+
+      return next();
+    } catch (error) {
+      if (!error.status) {
+        error.status = 500;
+      }
+
+      response.locals.error = error;
+      return next();
     }
   },
 
-  create: (request: Request, response: Response): Response => {
+  create: (request: Request, response: Response, next: NextFunction): Response | void => {
     const { title, type, value } = request.body;
 
     try {
@@ -47,9 +58,19 @@ const TransactionController: TransactionControllerDTO = {
         value,
       });
 
-      return response.status(201).json(transactionCreated);
-    } catch (err) {
-      return response.status(err.status || 400).json({ error: err.message });
+      const httpStatusCodeCreated = 201;
+
+      response.locals.responseBody = transactionCreated;
+      response.locals.httpStatusCode = httpStatusCodeCreated;
+
+      return next();
+    } catch (error) {
+      if (!error.status) {
+        error.status = 500;
+      }
+
+      response.locals.error = error;
+      return next();
     }
   },
 };
