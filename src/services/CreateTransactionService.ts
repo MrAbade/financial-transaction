@@ -1,6 +1,12 @@
-import TransactionsRepository from '../repositories/TransactionsRepository';
-import Transaction from '../models/Transaction';
-import WebError from '../customs/WebError.class';
+import TransactionsRepository from '../repositories/Transactions.repositories';
+import Transaction from '../models/Transactions.classes';
+import WebError from '../customs/WebError.classes';
+
+interface CreateTransactionDTO {
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+}
 
 export default class CreateTransactionService {
   private transactionsRepository: TransactionsRepository;
@@ -27,18 +33,9 @@ export default class CreateTransactionService {
     const { total } = this.transactionsRepository.getBalance();
 
     if (total < value) {
-      throw new WebError({
-        message: "You don't have enough balance",
-        status: 400,
-      });
+      throw new WebError({ message: "You don't have enough balance", status: 400 });
     }
 
     return true;
   }
-}
-
-interface CreateTransactionDTO {
-  title: string;
-  value: number;
-  type: 'income' | 'outcome';
 }

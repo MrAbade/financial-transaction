@@ -1,5 +1,12 @@
 import { uuid } from 'uuidv4';
 
+interface TransactionDTO {
+  id: string;
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+}
+
 export default class Transaction implements TransactionDTO {
   id: string;
 
@@ -15,11 +22,4 @@ export default class Transaction implements TransactionDTO {
     this.value = value;
     this.type = type;
   }
-}
-
-interface TransactionDTO {
-  id: string;
-  title: string;
-  value: number;
-  type: 'income' | 'outcome';
 }

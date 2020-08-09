@@ -1,4 +1,16 @@
-import Transaction from '../models/Transaction';
+import Transaction from '../models/Transactions.classes';
+
+interface BalanceDTO {
+  income: number;
+  outcome: number;
+  total: number;
+}
+
+interface CreateTransactionDTO {
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+}
 
 export default class TransactionsRepository {
   private transactions: Transaction[];
@@ -46,9 +58,7 @@ export default class TransactionsRepository {
   }
 
   private hasIncome(): boolean {
-    const foundIncome = this.transactions.find(
-      transaction => transaction.type === 'income',
-    );
+    const foundIncome = this.transactions.find(transaction => transaction.type === 'income');
 
     if (!foundIncome) {
       return false;
@@ -66,16 +76,4 @@ export default class TransactionsRepository {
 
     return true;
   }
-}
-
-interface BalanceDTO {
-  income: number;
-  outcome: number;
-  total: number;
-}
-
-interface CreateTransactionDTO {
-  title: string;
-  value: number;
-  type: 'income' | 'outcome';
 }
